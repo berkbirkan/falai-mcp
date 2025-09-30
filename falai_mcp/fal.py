@@ -1,14 +1,16 @@
 from __future__ import annotations
 
 import logging
-from typing import Any, Dict, Iterable, List, Optional
+from typing import Any, Dict, Iterable, List, Optional, Sequence
 
 import httpx
 import fal_client
 
-from .model_index import filter_models, load_model_ids
+from .model_index import filter_models, load_packaged_model_ids
 
 logger = logging.getLogger(__name__)
+
+_PUBLIC_API_BASE = "https://fal.ai/api"
 
 
 class FalAIService:
@@ -19,6 +21,7 @@ class FalAIService:
         self.timeout = timeout
         self._http = httpx.Client(timeout=timeout, follow_redirects=True)
         self._client = fal_client.SyncClient(key=api_key, default_timeout=timeout)
+        self._catalogue: Optional[List[str]] = None
 
     # ------------------------------------------------------------------
     # Model catalogue helpers
@@ -28,7 +31,8 @@ class FalAIService:
         per_page: Optional[int] = None,
         allowed: Iterable[str] | None = None,
     ) -> Dict[str, Any]:
-        models = filter_models(allowed)
+        catalogue = self._get_catalogue()
+        models = filter_models(allowed, catalogue)
 
         if per_page and per_page > 0 and page and page > 0:
             start = (page - 1) * per_page
@@ -47,7 +51,9 @@ class FalAIService:
         keywords: Iterable[str],
         allowed: Iterable[str] | None = None,
     ) -> List[str]:
-        catalogue = filter_models(allowed) if allowed else load_model_ids()
+        catalogue = self._get_catalogue()
+        if allowed:
+            catalogue = filter_models(allowed, catalogue)
         tokens = [token.strip().lower() for token in keywords if token.strip()]
         if not tokens:
             return catalogue
@@ -56,6 +62,96 @@ class FalAIService:
             for model in catalogue
             if all(token in model.lower() for token in tokens)
         ]
+        return results
+
+    def _get_catalogue(self) -> List[str]:
+        if self._catalogue is None:
+            packaged = load_packaged_model_ids()
+            if packaged is not None:
+                self._catalogue = packaged
+            else:
+                self._catalogue = self._fetch_catalogue_from_public_api()
+        return self._catalogue
+
+    def _fetch_catalogue_from_public_api(self) -> List[str]:
+        url = f"{_PUBLIC_API_BASE}/models"
+        page = 1
+        per_page = 200
+        seen: List[str] = []
+        seen_set: set[str] = set()
+
+        while page <= 100:  # guard against runaway pagination
+            try:
+                response = self._http.get(
+                    url,
+                    params={"page": page, "total": per_page},
+                    headers=self._auth_headers,
+                )
+                response.raise_for_status()
+            except httpx.HTTPError as exc:  # pragma: no cover - network dependent
+                logger.warning("Failed to fetch fal.ai model catalogue (page %s): %s", page, exc)
+                break
+
+            payload = response.json()
+            batch = self._extract_model_ids(payload)
+            if not batch:
+                break
+
+            new_items = [item for item in batch if item not in seen_set]
+            if not new_items:
+                break
+
+            seen.extend(new_items)
+            seen_set.update(new_items)
+
+            if len(batch) < per_page:
+                break
+
+            page += 1
+
+        if not seen:
+            logger.warning("fal.ai model catalogue fetch returned no items; search results may be empty")
+
+        return sorted(seen)
+
+    @staticmethod
+    def _extract_model_ids(payload: Any) -> List[str]:
+        def coerce(item: Any) -> Optional[str]:
+            if isinstance(item, str):
+                value = item.strip()
+                return value or None
+            if isinstance(item, dict):
+                for key in (
+                    "id",
+                    "endpoint_id",
+                    "endpointId",
+                    "model_id",
+                    "modelId",
+                    "slug",
+                    "name",
+                ):
+                    candidate = item.get(key)
+                    if isinstance(candidate, str) and candidate.strip():
+                        return candidate.strip()
+            return None
+
+        items: Sequence[Any]
+        if isinstance(payload, list):
+            items = payload
+        elif isinstance(payload, dict):
+            raw_items = payload.get("items")
+            if isinstance(raw_items, list):
+                items = raw_items
+            else:
+                items = [payload]
+        else:
+            return []
+
+        results: List[str] = []
+        for item in items:
+            value = coerce(item)
+            if value:
+                results.append(value)
         return results
 
     # ------------------------------------------------------------------
