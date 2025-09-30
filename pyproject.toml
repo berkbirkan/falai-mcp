@@ -1,0 +1,17 @@
+[project]
+name = "falai-mcp-server"
+version = "0.1.0"
+description = "FastMCP server exposing fal.ai model APIs"
+requires-python = ">=3.10"
+dependencies = [
+  "fastmcp>=2.12.4",
+  "fal-client>=0.7.0",
+  "httpx>=0.28",
+]
+
+[project.scripts]
+falai-mcp = "falai_mcp.main:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["falai_mcp*"]
