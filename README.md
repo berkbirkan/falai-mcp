@@ -8,14 +8,16 @@ A FastMCP server that exposes core fal.ai model API operations (model catalogue,
     playsinline
     style="max-width:100%;height:auto;border-radius:12px;"
     width="960"
-    poster="https://placehold.co/960x540?text=Video+Demo"
+    poster="https://placehold.co/960x540?text=Demo+Video"
   >
-    <source src="https://github.com/user-attachments/assets/8b08f27f-e701-44cd-804b-a4142020c2ba" type="video/mov" />
+    <!-- Senin .mov videon -->
+    <source src="https://github.com/user-attachments/assets/8b08f27f-e701-44cd-804b-a4142020c2ba" type="video/quicktime" />
     Tarayıcınız video etiketini desteklemiyor.
   </video>
   <br/>
-  <sub>🎬FALAI MCP</sub>
+  <sub>🎬 Demo Video</sub>
 </div>
+
 
 
 ## Requirements
