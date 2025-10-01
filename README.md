@@ -2,7 +2,20 @@
 
 A FastMCP server that exposes core fal.ai model API operations (model catalogue, search, schema retrieval, inference, queue management, CDN uploads). The server can run locally over STDIO or remotely via the Streamable HTTP transport, and now ships with Docker support for easier deployment.
 
-[![FALAI MCP](https://img.youtube.com/vi/5Ackkkv7xNM/maxresdefault.jpg)](https://www.youtube.com/watch?v=5Ackkkv7xNM)
+<div align="center">
+  <video
+    controls
+    playsinline
+    style="max-width:100%;height:auto;border-radius:12px;"
+    width="960"
+    poster="https://placehold.co/960x540?text=Video+Demo"
+  >
+    <source src="https://github.com/user-attachments/assets/8b08f27f-e701-44cd-804b-a4142020c2ba" type="video/mp4" />
+    Tarayıcınız video etiketini desteklemiyor.
+  </video>
+  <br/>
+  <sub>🎬FALAI MCP</sub>
+</div>
 
 
 ## Requirements
