@@ -2,6 +2,9 @@
 
 A FastMCP server that exposes core fal.ai model API operations (model catalogue, search, schema retrieval, inference, queue management, CDN uploads). The server can run locally over STDIO or remotely via the Streamable HTTP transport, and now ships with Docker support for easier deployment.
 
+[![FALAI MCP](https://img.youtube.com/vi/5Ackkkv7xNM/maxresdefault.jpg)](https://www.youtube.com/watch?v=5Ackkkv7xNM)
+
+
 ## Requirements
 
 - Python 3.10 or newer (only needed for local installation)
