@@ -22,7 +22,7 @@ RUN pip install --upgrade pip setuptools wheel
 # Copy requirements first for better caching
 COPY pyproject.toml requirements.txt /app/
 
-# Install Python dependencies with conflict resolution
+# Install Python dependencies with compatibility resolution
 RUN pip install --no-cache-dir --no-deps . && \
     pip install --no-cache-dir -r requirements.txt
 

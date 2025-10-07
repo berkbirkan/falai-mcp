@@ -1,7 +1,11 @@
-# Core dependencies with specific versions to avoid conflicts
-fastmcp>=2.12.4,<3.0.0
+# Core dependencies compatible with the specified package list
+fastmcp>=2.10.0,<2.12.0
 fal-client>=0.7.0,<1.0.0
-httpx>=0.28,<1.0.0
+httpx==0.27.0
 
-# Avoid openai package conflicts
---no-deps
+# Compatible with the main package list:
+# fastapi==0.111.0, uvicorn[standard]==0.30.1, httpx==0.27.0
+# PyJWT[crypto]==2.9.0, supabase==2.8.0, agno==2.1.1
+# openai>=1.0.0, sqlalchemy>=2.0.0, celery, pgvector>=0.2.0
+# psycopg[binary]>=3.0.0, beautifulsoup4>=4.12.0, aiohttp>=3.9.0
+# mcp, lancedb>=0.4.0, pandas>=2.0.0

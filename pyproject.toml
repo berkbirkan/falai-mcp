@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "falai-mcp-tools"
-version = "0.1.1"
+version = "0.1.3"
 description = "FastMCP server exposing fal.ai model APIs"
 readme = "README.md"
 license = "MIT"
@@ -28,9 +28,9 @@ classifiers = [
 ]
 requires-python = ">=3.10"
 dependencies = [
-  "fastmcp>=2.12.4,<3.0.0",
+  "fastmcp>=2.10.0,<2.12.0",
   "fal-client>=0.7.0,<1.0.0",
-  "httpx>=0.28,<1.0.0",
+  "httpx==0.27.0",
 ]
 
 [project.scripts]
