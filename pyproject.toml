@@ -1,7 +1,31 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
 [project]
-name = "falai-mcp-server"
+name = "falai-mcp-tools"
 version = "0.1.0"
 description = "FastMCP server exposing fal.ai model APIs"
+readme = "README.md"
+license = "MIT"
+authors = [
+    {name = "Berk Birkan", email = "berkbirkan@example.com"}
+]
+maintainers = [
+    {name = "Berk Birkan", email = "berkbirkan@example.com"}
+]
+keywords = ["mcp", "fal.ai", "ai", "model", "api", "server"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Internet :: WWW/HTTP :: HTTP Servers",
+]
 requires-python = ">=3.10"
 dependencies = [
   "fastmcp>=2.12.4",
@@ -12,6 +36,14 @@ dependencies = [
 [project.scripts]
 falai-mcp = "falai_mcp.main:main"
 
+[project.urls]
+Homepage = "https://github.com/berkbirkan/falai-mcp"
+Repository = "https://github.com/berkbirkan/falai-mcp"
+Issues = "https://github.com/berkbirkan/falai-mcp/issues"
+
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["falai_mcp*"]
+
+[tool.setuptools.package-data]
+falai_mcp = ["py.typed"]

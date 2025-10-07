@@ -1,42 +1,47 @@
-# fal.ai FastMCP server
+# falai-mcp-server
 
 A FastMCP server that exposes core fal.ai model API operations (model catalogue, search, schema retrieval, inference, queue management, CDN uploads). The server can run locally over STDIO or remotely via the Streamable HTTP transport, and now ships with Docker support for easier deployment.
 
 <video controls width="1920" height="512" src="https://github.com/user-attachments/assets/f8cfb202-3d69-4395-959d-76b2a11181e7">Your browser does not support the video tag.</video>
 
+## Quick Start
 
+### PyPI Installation (Recommended)
 
-## Requirements
+```bash
+pip install falai-mcp-tools
+```
 
-- Python 3.10 or newer (only needed for local installation)
-- A fal.ai API key: either `FAL_KEY` or the `FAL_KEY_ID`/`FAL_KEY_SECRET` pair
-- Docker (optional, only if you prefer containerized execution)
+After installation, you can run the server with:
 
-## Installation Options
+```bash
+falai-mcp
+```
 
-### Local Python environment
+### Manual Installation
 
-1. Create and activate a virtual environment.
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/berkbirkan/falai-mcp.git
+   cd falai-mcp
+   ```
+
+2. Create and activate a virtual environment:
    ```bash
    python3 -m venv .venv
-   source .venv/bin/activate
+   source .venv/bin/activate  # On Windows: .venv\Scripts\activate
    ```
-2. Install the project in editable mode.
+
+3. Install the project in editable mode:
    ```bash
    pip install -e .
    ```
-3. Set your fal.ai credentials (`FAL_KEY` or `FAL_KEY_ID`/`FAL_KEY_SECRET`) before starting the server.
 
-### Docker image
+## Requirements
 
-1. Build the container image inside the repository root.
-   ```bash
-   docker build -t falai-mcp .
-   ```
-2. Provide credentials at runtime (either with `-e` or `--env-file`).
-3. Run the container with the transport you want (see the usage sections below for STDIO vs. HTTP).
-
-> Tip: add additional `-e` flags (or use an `.env` file) for the optional environment variables described in the configuration table.
+- Python 3.10 or newer
+- A fal.ai API key: either `FAL_KEY` or the `FAL_KEY_ID`/`FAL_KEY_SECRET` pair
+- Docker (optional, only if you prefer containerized execution)
 
 ## Configuration
 
@@ -55,45 +60,46 @@ If you prefer a `.env` file, place it next to the project root (or mount it into
 
 > Clients can override credentials and model filters per MCP session through the `configure` tool. Environment variables supply defaults when the client does not set overrides.
 
-## Local STDIO usage
+## Usage
 
-### Python environment
+### Local STDIO usage
 
-1. Ensure your virtual environment is active and credentials are exported.
-2. Run the server with the default STDIO transport.
+1. Ensure your virtual environment is active and credentials are exported:
+   ```bash
+   export FAL_KEY=sk_live_...
+   ```
+
+2. Run the server with the default STDIO transport:
    ```bash
    falai-mcp
    ```
+
 3. Leave the process running; configure your MCP client (Claude, Cursor, etc.) to launch this command via STDIO (see the client integration section).
 
-### Docker container (advanced)
+### Remote HTTP usage
 
-STDIO expects the MCP client to spawn the process directly. You can still use Docker if you wrap the command so the client starts the container. Example command reference for a client configuration:
-```bash
-/usr/bin/env docker run --rm -i falai-mcp falai-mcp
-```
-Make sure you pass credentials with `-e`/`--env-file` and attach STDIN/STDOUT (`-i`). This approach is optional; most users prefer running STDIO directly on the host.
-
-## Remote HTTP usage
-
-### Python environment
-
-1. Export credentials and enable the HTTP transport.
+1. Export credentials and enable the HTTP transport:
    ```bash
    export FAL_KEY=sk_live_...
    export FALAI_ENABLE_HTTP=true
    export FALAI_HTTP_PORT=8080  # optional override
    ```
-2. Start the server so it listens on the configured host/port.
+
+2. Start the server so it listens on the configured host/port:
    ```bash
    falai-mcp
    ```
+
 3. Confirm the HTTP transport is reachable (for example with `curl -I http://localhost:8080/mcp/`). Clients should connect to `http://<host>:<port>/mcp/`.
 
-### Docker container
+### Docker Usage
 
-1. Build the image if you have not already: `docker build -t falai-mcp .`.
-2. Run the container with HTTP enabled and publish the port.
+1. Build the container image:
+   ```bash
+   docker build -t falai-mcp .
+   ```
+
+2. Run the container with HTTP enabled and publish the port:
    ```bash
    docker run \
      --rm \
@@ -103,7 +109,8 @@ Make sure you pass credentials with `-e`/`--env-file` and attach STDIN/STDOUT (`
      -p 8080:8080 \
      falai-mcp
    ```
-3. The MCP endpoint is now available at `http://localhost:8080/mcp/`. Adjust the host/port mapping to expose it to your clients or infrastructure.
+
+3. The MCP endpoint is now available at `http://localhost:8080/mcp/`.
 
 ## Client integrations
 
@@ -118,7 +125,7 @@ Claude Desktop keeps its configuration in `~/Library/Application Support/Claude/
   {
     "mcpServers": {
       "falai-local": {
-        "command": "/path/to/venv/bin/falai-mcp",
+        "command": "falai-mcp",
         "args": [],
         "env": {
           "FAL_KEY": "sk_live_..."
@@ -142,7 +149,6 @@ Claude Desktop keeps its configuration in `~/Library/Application Support/Claude/
     }
   }
   ```
-  Make sure the remote server is reachable from the machine running Claude Desktop. When running in Docker on another host, replace `localhost` with the accessible address or DNS name.
 
 ### Cursor
 
@@ -153,7 +159,7 @@ Cursor reads MCP configuration from `~/.cursor/mcp.json`.
   {
     "clients": {
       "falai-local": {
-        "command": "/path/to/venv/bin/falai-mcp",
+        "command": "falai-mcp",
         "args": [],
         "env": {
           "FAL_KEY": "sk_live_..."
@@ -195,8 +201,35 @@ After editing `mcp.json`, restart Cursor (or reload MCP connections) to pick up 
 
 All tools enforce any configured allow-list and respect per-session overrides from the `configure` tool.
 
+## Development
+
+### Building for PyPI
+
+1. Install build tools:
+   ```bash
+   pip install build twine
+   ```
+
+2. Build the package:
+   ```bash
+   python -m build
+   ```
+
+3. Upload to PyPI (test first with TestPyPI):
+   ```bash
+   # Test upload
+   python -m twine upload --repository testpypi dist/*
+   
+   # Production upload
+   python -m twine upload dist/*
+   ```
+
 ## Notes
 
 - Schema retrieval and queue inspection require valid fal.ai credentials; errors appear as MCP tool errors if credentials are missing or invalid.
-- Model discovery falls back to the bundled `fal-client` endpoint catalogue when fal.ai’s public APIs are unavailable.
+- Model discovery falls back to the bundled `fal-client` endpoint catalogue when fal.ai's public APIs are unavailable.
 - When running remotely, ensure network access between the client and the MCP server (open firewall ports, configure TLS or reverse proxies if needed).
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
