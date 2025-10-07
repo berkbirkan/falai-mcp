@@ -4,7 +4,9 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     FALAI_ENABLE_HTTP=true \
     FALAI_HTTP_HOST=0.0.0.0 \
-    FALAI_HTTP_PORT=18888
+    FALAI_HTTP_PORT=18888 \
+    PIP_NO_CACHE_DIR=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1
 
 WORKDIR /app
 
@@ -14,11 +16,15 @@ RUN apt-get update && apt-get install -y \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy requirements first for better caching
-COPY pyproject.toml /app/
+# Upgrade pip and install build tools
+RUN pip install --upgrade pip setuptools wheel
 
-# Install Python dependencies
-RUN pip install --no-cache-dir .
+# Copy requirements first for better caching
+COPY pyproject.toml requirements.txt /app/
+
+# Install Python dependencies with conflict resolution
+RUN pip install --no-cache-dir --no-deps . && \
+    pip install --no-cache-dir -r requirements.txt
 
 # Copy application code
 COPY falai_mcp /app/falai_mcp

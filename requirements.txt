@@ -1,0 +1,7 @@
+# Core dependencies with specific versions to avoid conflicts
+fastmcp>=2.12.4,<3.0.0
+fal-client>=0.7.0,<1.0.0
+httpx>=0.28,<1.0.0
+
+# Avoid openai package conflicts
+--no-deps
